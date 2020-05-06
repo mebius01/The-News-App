@@ -1,1 +1,2 @@
-# The-News-App
+# The News App
+Нвостне приложение
