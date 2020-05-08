@@ -10,40 +10,67 @@ const country = {
     ua: "Ukraina",
     fr: "France"
 };
-const q = ""
-const category = ""
+let q = '';
+const category = {
+    business: "Business",
+    entertainment: "Entertainment",
+    general: "General",
+    health: "Health",
+    science: "Science",
+    sports: "Sports",
+    technology: "echnology",
+}
 
 
 const grid = document.querySelector(".grid");
-const selectCountry = document.querySelector('select');
+const selectCountry = document.getElementById('selectCountry');
+const selectCategory = document.getElementById('selectCategory');
+const search = document.getElementById('search');
+
 
 // Формирует <option value="us">USA</option>
-function createOtionCountry(objCountry) {
-    for (let country in objCountry) {
-        let option = new Option(objCountry[country], country);
-        selectCountry.appendChild(option);
+function createOtion(objectSelect, elementSelect) {
+    for (let country in objectSelect) {
+        let option = new Option(objectSelect[country], country);
+        elementSelect.appendChild(option);
     }
 }
-createOtionCountry(country);
-selectCountry.options[1].selected = true
-// console.log(selectCountry.value);
-// [...selectCountry.options].forEach(item => {
-//     console.log(item);
-// })
+createOtion(country, selectCountry);
+createOtion(category, selectCategory);
 
-// Когда выбран новый элемент <option>
-let c = "us"
-selectCountry.options[1].selected = true
+// selectCountry.options[1].selected = true
 selectCountry.addEventListener('change', getValue);
-function getValue() {
-    option = selectCountry.options[1];
-    let index = selectCountry.selectedIndex;
-    option = selectCountry.options[index];
-    // console.log(option.value);
-    return option.value;
+selectCategory.addEventListener('change', getValue);
+search.addEventListener('keyup', inputSearch);
+
+function inputSearch() {
+    q = search.value;
+    console.log(q);
+    return q;
 }
-c = getValue()
-console.log(c);
+
+function getValue(event) {
+    let target = event.target;
+    let index = target.selectedIndex;
+    option = target.options[index];
+    // return option.value;
+
+    grid.innerHTML = '';
+
+    GetAjax("GET", `https://newsapi.org/v2/${prephix}?country=${option.value}&category=${""}&q=${q}&apiKey=${apiKey}`, (err, response) => {
+        if (err) {
+            console.log(err, response);
+            return;
+        }
+        const arr = response.articles;
+        createFragment(arr);
+    });
+    if (grid.childElementCount) {
+
+    }
+    console.log(option.value);
+}
+
 // Формирует одну карточку
 function createCard(articleObj) {
     const article = document.createElement('article');
@@ -78,20 +105,19 @@ function createFragment(arr) {
     grid.appendChild(fragment);
 }
 
-GetAjax("GET", `https://newsapi.org/v2/${prephix}?country=${c}&category=${category}&q=${q}&apiKey=${apiKey}`, (err, response) => {
-        if (err) {
-            console.log(err, response);
-            return;
-        }
-        const arr = response.articles;
-        createFragment(arr);
+GetAjax("GET", `https://newsapi.org/v2/${prephix}?country=us&category=${""}&q=${q}&apiKey=${apiKey}`, (err, response) => {
+    if (err) {
+        console.log(err, response);
+        return;
+    }
+    const arr = response.articles;
+    createFragment(arr);
 });
 
-
 // Materialize code
-document.addEventListener('DOMContentLoaded', function() {
-   let elems = document.querySelectorAll('select');
-   let instances = M.FormSelect.init(elems);
+document.addEventListener('DOMContentLoaded', function () {
+    let elems = document.querySelectorAll('select');
+    M.FormSelect.init(elems);
 });
 
 function helpCreateElement(el, arrClass, cont) {
@@ -131,3 +157,61 @@ function GetAjax(method, url, cb, object) {
     }
 
 }
+
+// Custom Http Module
+function customHttp() {
+    return {
+        get(url, cb) {
+            try {
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', url);
+                xhr.addEventListener('load', () => {
+                    if (Math.floor(xhr.status / 100) !== 2) {
+                        cb(`Error. Status code: ${xhr.status}`, xhr);
+                        return;
+                    }
+                    const response = JSON.parse(xhr.responseText);
+                    cb(null, response);
+                });
+
+                xhr.addEventListener('error', () => {
+                    cb(`Error. Status code: ${xhr.status}`, xhr);
+                });
+
+                xhr.send();
+            } catch (error) {
+                cb(error);
+            }
+        },
+        post(url, body, headers, cb) {
+            try {
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', url);
+                xhr.addEventListener('load', () => {
+                    if (Math.floor(xhr.status / 100) !== 2) {
+                        cb(`Error. Status code: ${xhr.status}`, xhr);
+                        return;
+                    }
+                    const response = JSON.parse(xhr.responseText);
+                    cb(null, response);
+                });
+
+                xhr.addEventListener('error', () => {
+                    cb(`Error. Status code: ${xhr.status}`, xhr);
+                });
+
+                if (headers) {
+                    Object.entries(headers).forEach(([key, value]) => {
+                        xhr.setRequestHeader(key, value);
+                    });
+                }
+
+                xhr.send(JSON.stringify(body));
+            } catch (error) {
+                cb(error);
+            }
+        },
+    };
+}
+// Init http module
+const http = customHttp();
