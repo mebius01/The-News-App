@@ -1,99 +1,133 @@
 // apiKey: f688191515cc453fb543eb624095d76a
 
-// Top headlines /v2/top-headlines: https://newsapi.org/v2/top-headlines?country=us&apiKey=f688191515cc453fb543eb624095d76a
+// Top headlines /v2/top-headlines:
+const rootUrl = "https://newsapi.org/v2/";
+const apiKey = "f688191515cc453fb543eb624095d76a";
 
-// Everything /v2/everything https://newsapi.org/v2/everything?q=bitcoin&apiKey=f688191515cc453fb543eb624095d76a
-
-// Sources /v2/sources ://newsapi.org/v2/sources?apiKey=f688191515cc453fb543eb624095d76a
-
-
-
-
-// const newS = {
-//     "status": "ok",
-//     "totalResults": 38,
-//     -"articles": [
-//     -{
-//     -"source": {
-//     "id": null,
-//     "name": "Theguardian.com"
-//     },
-//     "author": "Oliver Holmes",
-//     "title": "Israeli court rules Netanyahu can form government under criminal indictment - The Guardian",
-//     "description": "Decision removes last barrier to country’s longest serving leader forming unity government with former rival Benny Gantz",
-//     "url": "https://www.theguardian.com/world/2020/may/07/israel-netanyahu-and-gantz-get-supreme-court-nod-for-coalition",
-//     "urlToImage": "https://i.guim.co.uk/img/media/731c4526db02a8371bc951d4101a6d5c99f8ebb3/0_0_5472_3283/master/5472.jpg?width=1200&height=630&quality=85&auto=format&fit=crop&overlay-align=bottom%2Cleft&overlay-width=100p&overlay-base64=L2ltZy9zdGF0aWMvb3ZlcmxheXMvdGctZGVmYXVsdC5wbmc&enable=upscale&s=4caf8cbc6f2acd7247beb94b07726458",
-//     "publishedAt": "2020-05-07T06:32:00Z",
-//     "content": "Israels top court has ruled Benjamin Netanyahu can legally form a government while under criminal indictment for corruption, paving the way for him to be sworn in as prime minister next week.\r\nThe unanimous decision, released overnight, swatted down last-ditc… [+2986 chars]"
-//     }
-//     ]
-// }
+const prephix = "top-headlines";
+const country = {
+    us: "USA",
+    ua: "Ukraina",
+    fr: "France"
+};
+const q = ""
+const category = ""
 
 
-// let url = 'http://newsapi.org/v2/top-headlines?' +
-//         'country=us&' +
-//         'apiKey=f688191515cc453fb543eb624095d76a';
-// let req = new Request(url);
-// fetch(req)
-//     .then(function(response) {
-//         console.log(response.json());
-//     })
+const grid = document.querySelector(".grid");
+const selectCountry = document.querySelector('select');
 
-
-// AJAX GET
-function getUsers(cb) {
-    const xhr = new XMLHttpRequest();
-    xhr.open("GET", "https://jsonplaceholder.typicode.com/users");
-    xhr.addEventListener("load", () => {
-        const users = JSON.parse(xhr.responseText)
-        cb(users)
-    })
-
-    xhr.addEventListener("error", () => {
-        console.log("ERROR");
-    })
-
-    xhr.send();
-}
-
-function GetAjax(object, cb, url, method) {
-    const xhr = new XMLHttpRequest();
-    xhr.open(method, url);
-    xhr.addEventListener("load", () => {
-        const response = JSON.parse(xhr.responseText)
-        cb(response)
-    });
-    xhr.addEventListener("error", () => {
-        console.log("ERROR");
-    });
-    if (object) {
-        xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
-        xhr.send(JSON.stringify(object));
-    } else if (!object) {
-        xhr.send();
+// Формирует <option value="us">USA</option>
+function createOtionCountry(objCountry) {
+    for (let country in objCountry) {
+        let option = new Option(objCountry[country], country);
+        selectCountry.appendChild(option);
     }
 }
+createOtionCountry(country);
+selectCountry.options[1].selected = true
+// console.log(selectCountry.value);
+// [...selectCountry.options].forEach(item => {
+//     console.log(item);
+// })
 
-// AJAX POST
-function postUser(object, cb) {
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", "https://jsonplaceholder.typicode.com/users");
-    xhr.addEventListener("load", () => {
-        const user = JSON.parse(xhr.responseText);
-        cb(user);
-    });
-
-    xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8")
-
-    xhr.addEventListener("error", () => {
-        console.log("ERROR");
-    });
-
-    xhr.send(JSON.stringify(object));
+// Когда выбран новый элемент <option>
+let c = "us"
+selectCountry.options[1].selected = true
+selectCountry.addEventListener('change', getValue);
+function getValue() {
+    option = selectCountry.options[1];
+    let index = selectCountry.selectedIndex;
+    option = selectCountry.options[index];
+    // console.log(option.value);
+    return option.value;
 }
+c = getValue()
+console.log(c);
+// Формирует одну карточку
+function createCard(articleObj) {
+    const article = document.createElement('article');
+    article.classList.add("card");
+    article.insertAdjacentHTML('afterbegin', `<div class="card-image waves-effect waves-block waves-light">
+            <img class="activator" src="${articleObj.urlToImage}">
+        </div>
+        <div class="card-content">
+            <span class="card-title activator grey-text text-darken-4">
+                ${articleObj.title}
+                <i class="material-icons right">more_vert</i>
+            </span>
+            <p><a href="${articleObj.url}" target="_blank">${articleObj.source.name}</a></p>
+        </div>
+        <div class="card-reveal">
+            <span class="card-title grey-text text-darken-4">
+            ${articleObj.title}
+                <i class="material-icons right">close</i>
+            </span>
+            <p>${articleObj.content}</p>
+        </div>`);
+    return article;
+
+}
+
+// Формирует фрагмент
+function createFragment(arr) {
+    const fragment = document.createDocumentFragment();
+    arr.forEach(article => {
+        fragment.appendChild(createCard(article));
+    });
+    grid.appendChild(fragment);
+}
+
+GetAjax("GET", `https://newsapi.org/v2/${prephix}?country=${c}&category=${category}&q=${q}&apiKey=${apiKey}`, (err, response) => {
+        if (err) {
+            console.log(err, response);
+            return;
+        }
+        const arr = response.articles;
+        createFragment(arr);
+});
+
 
 // Materialize code
 document.addEventListener('DOMContentLoaded', function() {
-    var elems = document.querySelectorAll('select');
-    var instances = M.FormSelect.init(elems);
-    });
+   let elems = document.querySelectorAll('select');
+   let instances = M.FormSelect.init(elems);
+});
+
+function helpCreateElement(el, arrClass, cont) {
+    const element = document.createElement(el);
+    if (arrClass) {
+        arrClass.forEach(item => {
+            element.classList.add(item);
+        });
+    }
+    if (cont) {
+        element.append(cont);
+    }
+    return element;
+}
+
+function GetAjax(method, url, cb, object) {
+    try {
+        const xhr = new XMLHttpRequest();
+        xhr.open(method, url);
+        xhr.addEventListener("load", () => {
+            if (Math.floor(xhr.status / 100) !== 2) {
+                cb(`Error: ${xhr.status}`, xhr);
+                return;
+            }
+            const response = JSON.parse(xhr.responseText);
+            cb(null, response);
+        });
+
+        if (object) {
+            xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
+            xhr.send(JSON.stringify(object));
+        } else {
+            xhr.send();
+        }
+    } catch (error) {
+        cb(error);
+    }
+
+}
