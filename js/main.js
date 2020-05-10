@@ -59,6 +59,9 @@ function getOptionsForSelected(selectForm, sessionItem) {
 getOptionsForSelected(selectCountry, 'country');
 getOptionsForSelected(selectCategory, 'category');
 
+selectCountry.options[1].selected = true;
+selectCategory.options[3].selected = true;
+
 selectCountry.addEventListener('change', getValueCountry);
 selectCategory.addEventListener('change', getValueCategory);
 search.addEventListener('input', inputSearch);
@@ -185,7 +188,7 @@ function loadNews() {
         sessionStorage.setItem('category', 'general');
     }
     if (sessionStorage.getItem('country') == null) {
-        sessionStorage.setItem('country', 'ua');
+        sessionStorage.setItem('country', 'us');
     }
 
     let country = sessionStorage.getItem('country');
