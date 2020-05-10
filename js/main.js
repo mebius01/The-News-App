@@ -26,6 +26,11 @@ const selectCategory = document.getElementById('selectCategory');
 const menu = document.querySelector('.menu-news');
 const search = document.getElementById('search');
 
+selectCountry.addEventListener('change', getValueCountry);
+selectCategory.addEventListener('change', getValueCategory);
+search.addEventListener('input', inputSearch);
+menu.addEventListener("click", getTopHeadlines);
+
 // Формирует <option value="us">USA</option>
 function createOtion(objectSelect, elementSelect) {
     for (let country in objectSelect) {
@@ -36,17 +41,14 @@ function createOtion(objectSelect, elementSelect) {
 createOtion(country, selectCountry);
 createOtion(category, selectCategory);
 
-// for (let i = 0; i < selectCountry.options.length; i++) {
-//     if (selectCountry.options[i].value == sessionStorage.getItem('country')) {
-//         selectCountry.options[i].selected = true;
-//     }
-// }
-
-// for (let i = 0; i < selectCategory.options.length; i++) {
-//     if (selectCategory.options[i].value == sessionStorage.getItem('category')) {
-//         selectCategory.options[i].selected = true;
-//     }
-// }
+if (sessionStorage.getItem('category') == null) {
+    selectCategory.options[3].selected = true;
+    sessionStorage.setItem('category', 'general');
+}
+if (sessionStorage.getItem('country') == null) {
+    selectCountry.options[1].selected = true;
+    sessionStorage.setItem('country', 'us');
+}
 
 // Функция получает значение для формы выбора страны и категории из sessionStorage
 function getOptionsForSelected(selectForm, sessionItem) {
@@ -54,18 +56,12 @@ function getOptionsForSelected(selectForm, sessionItem) {
         if (item.value == sessionStorage.getItem(sessionItem)) {
             item.selected = true;
         }
+        // && sessionStorage.getItem('country') == null
+        // sessionStorage.setItem("country") == item.value;
     });
 }
 getOptionsForSelected(selectCountry, 'country');
 getOptionsForSelected(selectCategory, 'category');
-
-selectCountry.options[1].selected = true;
-selectCategory.options[3].selected = true;
-
-selectCountry.addEventListener('change', getValueCountry);
-selectCategory.addEventListener('change', getValueCategory);
-search.addEventListener('input', inputSearch);
-menu.addEventListener("click", getTopHeadlines);
 
 // Очищает контейнер, кладет и получает данные из sessionStorage и отправлет их в newsService.topHeadlines
 function SessionData(setData, inputData) {
@@ -82,24 +78,24 @@ function getValueCountry(event) {
     let target = event.target;
     let index = target.selectedIndex;
     option = target.options[index];
-    // SessionData('country', option.value);
-    grid.innerHTML = '';
-    sessionStorage.setItem('country', option.value);
-    let country = sessionStorage.getItem('country');
-    let category = sessionStorage.getItem('category');
-    newsService.topHeadlines(country, category, query = "", cbGetResponse);
+    SessionData('country', option.value);
+    // grid.innerHTML = '';
+    // sessionStorage.setItem('country', option.value);
+    // let country = sessionStorage.getItem('country');
+    // let category = sessionStorage.getItem('category');
+    // newsService.topHeadlines(country, category, query = "", cbGetResponse);
 }
 
 function getValueCategory(event) {
     let target = event.target;
     let index = target.selectedIndex;
     option = target.options[index];
-    // SessionData('category', option.value);
-    grid.innerHTML = '';
-    sessionStorage.setItem('category', option.value);
-    let country = sessionStorage.getItem('country');
-    let category = sessionStorage.getItem('category');
-    newsService.topHeadlines(country, category, query = "", cbGetResponse);
+    SessionData('category', option.value);
+    // grid.innerHTML = '';
+    // sessionStorage.setItem('category', option.value);
+    // let country = sessionStorage.getItem('country');
+    // let category = sessionStorage.getItem('category');
+    // newsService.topHeadlines(country, category, query = "", cbGetResponse);
 }
 
 function inputSearch() {
@@ -169,8 +165,8 @@ const http = httpResponse();
 
 // Сервис для работы с API
 const newsService = (function () {
-    // const apiKey = "f688191515cc453fb543eb624095d76a";
-    const apiKey = '288ca27b35b34416aba589c70dfef532';
+    const apiKey = "f688191515cc453fb543eb624095d76a";
+    // const apiKey = '288ca27b35b34416aba589c70dfef532';
     const url = "https://newsapi.org/v2";
 
     return {
@@ -184,13 +180,6 @@ const newsService = (function () {
 // Принимает параметры. Вызывает калобек который отдает {status: "ok", totalResults: 30, articles: Array(20)}
 function loadNews() {
     progressShow();
-    if (sessionStorage.getItem('category') == null) {
-        sessionStorage.setItem('category', 'general');
-    }
-    if (sessionStorage.getItem('country') == null) {
-        sessionStorage.setItem('country', 'us');
-    }
-
     let country = sessionStorage.getItem('country');
     let category = sessionStorage.getItem('category');
     newsService.topHeadlines(country, category, query = "", cbGetResponse);
