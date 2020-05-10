@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function () {
     loadNews();
 });
 
-
+// Константы
 const country = {
     us: "USA",
     ua: "Ukraina",
@@ -23,10 +23,8 @@ const category = {
 const grid = document.querySelector(".grid");
 const selectCountry = document.getElementById('selectCountry');
 const selectCategory = document.getElementById('selectCategory');
+const menu = document.querySelector('.menu-news');
 const search = document.getElementById('search');
-const menu = document.querySelector('.menu-news')
-
-
 
 // Формирует <option value="us">USA</option>
 function createOtion(objectSelect, elementSelect) {
@@ -37,6 +35,18 @@ function createOtion(objectSelect, elementSelect) {
 }
 createOtion(country, selectCountry);
 createOtion(category, selectCategory);
+
+// for (let i = 0; i < selectCountry.options.length; i++) {
+//     if (selectCountry.options[i].value == sessionStorage.getItem('country')) {
+//         selectCountry.options[i].selected = true;
+//     }
+// }
+
+// for (let i = 0; i < selectCategory.options.length; i++) {
+//     if (selectCategory.options[i].value == sessionStorage.getItem('category')) {
+//         selectCategory.options[i].selected = true;
+//     }
+// }
 
 // Функция получает значение для формы выбора страны и категории из sessionStorage
 function getOptionsForSelected(selectForm, sessionItem) {
@@ -49,13 +59,10 @@ function getOptionsForSelected(selectForm, sessionItem) {
 getOptionsForSelected(selectCountry, 'country');
 getOptionsForSelected(selectCategory, 'category');
 
-// События
 selectCountry.addEventListener('change', getValueCountry);
 selectCategory.addEventListener('change', getValueCategory);
 search.addEventListener('input', inputSearch);
 menu.addEventListener("click", getTopHeadlines);
-
-
 
 // Очищает контейнер, кладет и получает данные из sessionStorage и отправлет их в newsService.topHeadlines
 function SessionData(setData, inputData) {
@@ -72,18 +79,28 @@ function getValueCountry(event) {
     let target = event.target;
     let index = target.selectedIndex;
     option = target.options[index];
-    SessionData('country', option.value);
+    // SessionData('country', option.value);
+    grid.innerHTML = '';
+    sessionStorage.setItem('country', option.value);
+    let country = sessionStorage.getItem('country');
+    let category = sessionStorage.getItem('category');
+    newsService.topHeadlines(country, category, query = "", cbGetResponse);
 }
 
 function getValueCategory(event) {
     let target = event.target;
     let index = target.selectedIndex;
     option = target.options[index];
-    SessionData('category', option.value);
+    // SessionData('category', option.value);
+    grid.innerHTML = '';
+    sessionStorage.setItem('category', option.value);
+    let country = sessionStorage.getItem('country');
+    let category = sessionStorage.getItem('category');
+    newsService.topHeadlines(country, category, query = "", cbGetResponse);
 }
 
 function inputSearch() {
-    SessionData('query', search.value)
+    SessionData('query', search.value);
 }
 
 // Обработка линокв меню
@@ -149,18 +166,21 @@ const http = httpResponse();
 
 // Сервис для работы с API
 const newsService = (function () {
-    const apiKey = "f688191515cc453fb543eb624095d76a";
+    // const apiKey = "f688191515cc453fb543eb624095d76a";
+    const apiKey = '288ca27b35b34416aba589c70dfef532';
     const url = "https://newsapi.org/v2";
 
     return {
         topHeadlines(country = "us", category = "general", query = "", cbGetResponse) {
-            http.get(`${url}/top-headlines?country=${country}&category=${category}&q=${query}&pageSize=50&apiKey=${apiKey}`, cbGetResponse);
-        },
+            http.get(`${url}/top-headlines?country=${country}&category=${category}&q=${query}&pageSize=100&apiKey=${apiKey}`, cbGetResponse);
+            console.log("topHeadlines");
+        }
     };
 }());
 
 // Принимает параметры. Вызывает калобек который отдает {status: "ok", totalResults: 30, articles: Array(20)}
 function loadNews() {
+    progressShow();
     if (sessionStorage.getItem('category') == null) {
         sessionStorage.setItem('category', 'general');
     }
@@ -172,7 +192,6 @@ function loadNews() {
     let category = sessionStorage.getItem('category');
     newsService.topHeadlines(country, category, query = "", cbGetResponse);
 }
-
 
 // Формирует одну карточку
 function createCard(articleObj) {
@@ -207,6 +226,11 @@ function createFragment(arr) {
     grid.appendChild(fragment);
 }
 
+// формирует контент для badge Принимает totalResults
+function createBadge(pageSize) {
+    const badge = document.querySelector(".badge")
+    badge.textContent = pageSize
+}
 
 // КолБек для topHeadlines
 function cbGetResponse(err, resp) {
@@ -215,6 +239,25 @@ function cbGetResponse(err, resp) {
             error: resp
         };
     }
-    // console.log(resp.totalResults);
+    // console.log("response");
+    createBadge(resp.totalResults);
     createFragment(resp.articles);
+    progressRemove();
+}
+
+// Добавляет прилоудер
+function progressShow() {
+    grid.insertAdjacentHTML("afterbegin",
+        `<div class="progress">
+        <div class="indeterminate blue"></div>
+    </div>`);
+}
+
+// Удалить прилоудер
+function progressRemove() {
+    const progress = grid.querySelector(".progress");
+    if (progress) {
+        progress.remove();
+        console.log(progress);
+    }
 }
