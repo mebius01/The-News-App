@@ -5,13 +5,12 @@ document.addEventListener('DOMContentLoaded', function () {
     loadNews();
 });
 
-// Константы
+
 const country = {
     us: "USA",
     ua: "Ukraina",
     fr: "France"
 };
-let q = '';
 const category = {
     business: "Бизнес",
     entertainment: "Развлечения",
@@ -25,6 +24,9 @@ const grid = document.querySelector(".grid");
 const selectCountry = document.getElementById('selectCountry');
 const selectCategory = document.getElementById('selectCategory');
 const search = document.getElementById('search');
+const menu = document.querySelector('.menu-news')
+
+
 
 // Формирует <option value="us">USA</option>
 function createOtion(objectSelect, elementSelect) {
@@ -36,53 +38,60 @@ function createOtion(objectSelect, elementSelect) {
 createOtion(country, selectCountry);
 createOtion(category, selectCategory);
 
-for (let i = 0; i < selectCountry.options.length; i++) {
-    if (selectCountry.options[i].value == sessionStorage.getItem('country')) {
-        selectCountry.options[i].selected = true;
-    }
+// Функция получает значение для формы выбора страны и категории из sessionStorage
+function getOptionsForSelected(selectForm, sessionItem) {
+    [...selectForm.options].forEach((item) => {
+        if (item.value == sessionStorage.getItem(sessionItem)) {
+            item.selected = true;
+        }
+    });
 }
+getOptionsForSelected(selectCountry, 'country');
+getOptionsForSelected(selectCategory, 'category');
 
-for (let i = 0; i < selectCategory.options.length; i++) {
-    if (selectCategory.options[i].value == sessionStorage.getItem('category')) {
-        selectCategory.options[i].selected = true;
-    }
-}
-
+// События
 selectCountry.addEventListener('change', getValueCountry);
 selectCategory.addEventListener('change', getValueCategory);
-search.addEventListener('keyup', inputSearch);
+search.addEventListener('input', inputSearch);
+menu.addEventListener("click", getTopHeadlines);
 
-// Обрабатывает формы
-function inputSearch() {
-    q = search.value;
-    console.log(q);
-    return q;
+
+
+// Очищает контейнер, кладет и получает данные из sessionStorage и отправлет их в newsService.topHeadlines
+function SessionData(setData, inputData) {
+    grid.innerHTML = '';
+    sessionStorage.setItem(setData, inputData);
+    let query = sessionStorage.getItem('query');
+    let country = sessionStorage.getItem('country');
+    let category = sessionStorage.getItem('category');
+    newsService.topHeadlines(country, category, query, cbGetResponse);
 }
 
+// Обрабатывает формы
 function getValueCountry(event) {
     let target = event.target;
     let index = target.selectedIndex;
     option = target.options[index];
-
-    grid.innerHTML = '';
-    sessionStorage.setItem('country', option.value);
-    let country = sessionStorage.getItem('country');
-    let category = sessionStorage.getItem('category');
-    newsService.topHeadlines(country, category, query = "", cbGetResponse);
+    SessionData('country', option.value);
 }
 
 function getValueCategory(event) {
     let target = event.target;
     let index = target.selectedIndex;
     option = target.options[index];
-
-    grid.innerHTML = '';
-    sessionStorage.setItem('category', option.value);
-    let country = sessionStorage.getItem('country');
-    let category = sessionStorage.getItem('category');
-    newsService.topHeadlines(country, category, query = "", cbGetResponse);
+    SessionData('category', option.value);
 }
 
+function inputSearch() {
+    SessionData('query', search.value)
+}
+
+// Обработка линокв меню
+function getTopHeadlines(event) {
+    let element = event.target
+    event.preventDefault();
+    console.log(element.id);
+}
 
 // AJAX
 function httpResponse() {
@@ -145,7 +154,7 @@ const newsService = (function () {
 
     return {
         topHeadlines(country = "us", category = "general", query = "", cbGetResponse) {
-            http.get(`${url}/top-headlines?country=${country}&category=${category}&q=${query}&apiKey=${apiKey}`, cbGetResponse);
+            http.get(`${url}/top-headlines?country=${country}&category=${category}&q=${query}&pageSize=50&apiKey=${apiKey}`, cbGetResponse);
         },
     };
 }());
@@ -206,5 +215,6 @@ function cbGetResponse(err, resp) {
             error: resp
         };
     }
+    // console.log(resp.totalResults);
     createFragment(resp.articles);
 }
