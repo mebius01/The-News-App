@@ -78,24 +78,24 @@ function getValueCountry(event) {
     let target = event.target;
     let index = target.selectedIndex;
     option = target.options[index];
-    SessionData('country', option.value);
-    // grid.innerHTML = '';
-    // sessionStorage.setItem('country', option.value);
-    // let country = sessionStorage.getItem('country');
-    // let category = sessionStorage.getItem('category');
-    // newsService.topHeadlines(country, category, query = "", cbGetResponse);
+    // SessionData('country', option.value);
+    grid.innerHTML = '';
+    sessionStorage.setItem('country', option.value);
+    let country = sessionStorage.getItem('country');
+    let category = sessionStorage.getItem('category');
+    newsService.topHeadlines(country, category, query = "", cbGetResponse);
 }
 
 function getValueCategory(event) {
     let target = event.target;
     let index = target.selectedIndex;
     option = target.options[index];
-    SessionData('category', option.value);
-    // grid.innerHTML = '';
-    // sessionStorage.setItem('category', option.value);
-    // let country = sessionStorage.getItem('country');
-    // let category = sessionStorage.getItem('category');
-    // newsService.topHeadlines(country, category, query = "", cbGetResponse);
+    // SessionData('category', option.value);
+    grid.innerHTML = '';
+    sessionStorage.setItem('category', option.value);
+    let country = sessionStorage.getItem('country');
+    let category = sessionStorage.getItem('category');
+    newsService.topHeadlines(country, category, query = "", cbGetResponse);
 }
 
 function inputSearch() {
