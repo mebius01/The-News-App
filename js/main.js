@@ -180,7 +180,6 @@ const newsService = (function () {
         `${url}/top-headlines?country=${country}&category=${category}&q=${query}&pageSize=100&apiKey=${apiKey}`,
         cbGetResponse
       );
-      console.log("topHeadlines");
     },
   };
 })();
@@ -242,7 +241,6 @@ function cbGetResponse(err, resp) {
       error: resp,
     };
   }
-  // console.log("response");
   createBadge(resp.totalResults);
   createFragment(resp.articles);
   progressRemove();
@@ -263,11 +261,5 @@ function progressRemove() {
   const progress = grid.querySelector(".progress");
   if (progress) {
     progress.remove();
-    console.log(progress);
   }
 }
-// const req = new XMLHttpRequest();
-// req.open("GET", document.location, false);
-// req.send(null);
-// const headers = req.getAllResponseHeaders().toLowerCase();
-// console.log(headers);
