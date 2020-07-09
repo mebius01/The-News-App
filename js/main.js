@@ -167,7 +167,7 @@ const http = httpResponse();
 const newsService = (function () {
   const apiKey = "f688191515cc453fb543eb624095d76a";
   // const apiKey = '288ca27b35b34416aba589c70dfef532';
-  const url = "https://newsapi.org/v2/";
+  const url = "https://cors-anywhere.herokuapp.com/https://newsapi.org/v2/";
 
   return {
     topHeadlines(
